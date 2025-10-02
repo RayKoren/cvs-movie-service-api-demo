@@ -1,12 +1,13 @@
 import { MovieRepository } from '../repositories/movie_repository';
 import { RatingsRepository } from '../repositories/ratings_repository';
 import { Paginated, Movie } from '../types';
+import { DEFAULT_PAGE_SIZE } from '../constants';
 
 export class MovieService {
   private movieRepository = new MovieRepository();
   private ratingsRepository = new RatingsRepository();
 
-  async list(page: number, limit: number = 50, select?: (keyof Movie)[] | string[]): Promise<Paginated<Movie>> { 
+  async list(page: number, limit: number = DEFAULT_PAGE_SIZE, select?: (keyof Movie)[] | string[]): Promise<Paginated<Movie>> { 
     return this.movieRepository.findAll({ page, limit, select }); 
   }
 
@@ -16,7 +17,7 @@ export class MovieService {
       const result = await this.movieRepository.findAll({ page: 1, limit: 1, where: { movieId: idOrTitle }, select });
       movie = result.data[0];
     } else {
-      const result = await this.movieRepository.findAll({ page: 1, limit: 1, where: { title: idOrTitle }, select });
+      const result = await this.movieRepository.findAll({ page: 1, limit: 1, like: { title: `%${idOrTitle}%` }, select });
       movie = result.data[0];
     }
 
@@ -26,17 +27,17 @@ export class MovieService {
     return { ...movie, avgRating } as Movie & { avgRating: number | null };
   }
 
-  async getByYear(year: number, page: number, sort: 'asc'|'desc', limit: number = 50, select?: (keyof Movie)[] | string[]): Promise<Paginated<Movie>> {
+  async getByYear(year: number, page: number, sort: 'asc'|'desc', limit: number = DEFAULT_PAGE_SIZE, select?: (keyof Movie)[] | string[]): Promise<Paginated<Movie>> {
     return this.movieRepository.findAll({ 
       page, 
       limit, 
-      where: { releaseDate: year.toString() },
+      like: { releaseDate: `${year.toString()}-%` },
       order: { releaseDate: sort },
       select
     });
   }
   
-  async getByGenre(genre: string, page: number, limit: number = 50, select?: (keyof Movie)[] | string[]): Promise<Paginated<Movie>> {
+  async getByGenre(genre: string, page: number, limit: number = DEFAULT_PAGE_SIZE, select?: (keyof Movie)[] | string[]): Promise<Paginated<Movie>> {
     return this.movieRepository.findAll({ 
       page, 
       limit, 

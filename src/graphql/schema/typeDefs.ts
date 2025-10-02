@@ -42,7 +42,7 @@ export const typeDefs = gql`
 
   type Query {
     movies(page: Int = 1): MoviePage!
-    movie(id: Int!): Movie
+    movie(id: Int, title: String): Movie
     moviesByYear(year: Int!, page: Int = 1, sort: String = "asc"): MoviePage!
     moviesByGenre(genre: String!, page: Int = 1): MoviePage!
   }

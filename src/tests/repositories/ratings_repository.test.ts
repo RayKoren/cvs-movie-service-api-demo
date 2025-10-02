@@ -1,30 +1,13 @@
-import { RatingsRepository } from '../../repositories/ratings_repository';
-import { setupTestDatabases, cleanupTestDatabases, getTestDbPath } from '../setup';
+import { setupTestDatabases, cleanupTestDatabases } from '../test_setup';
+import { createTestRatingsRepository } from '../helpers/testDbHelper';
 import { Rating } from '../../types';
-import path from 'path';
-
-// Mock the database path to use test databases
-jest.mock('../../repositories/ratings_repository', () => {
-  const originalModule = jest.requireActual('../../repositories/ratings_repository');
-  return {
-    ...originalModule,
-    RatingsRepository: class extends originalModule.RatingsRepository {
-      constructor() {
-        super();
-        // Override database path to use test database
-        const testDbPath = getTestDbPath();
-        this.ratingsDb = new (require('sqlite3').Database)(path.join(testDbPath, 'ratings.db'));
-      }
-    }
-  };
-});
 
 describe('RatingsRepository Integration Tests', () => {
-  let ratingsRepository: RatingsRepository;
+  let ratingsRepository: any;
 
   beforeAll(async () => {
     await setupTestDatabases();
-    ratingsRepository = new RatingsRepository();
+    ratingsRepository = createTestRatingsRepository();
   });
 
   afterAll(async () => {
@@ -86,7 +69,7 @@ describe('RatingsRepository Integration Tests', () => {
       
       expect(result.data).toHaveLength(2);
       expect(result.total).toBe(2);
-      result.data.forEach(rating => {
+      result.data.forEach((rating: any) => {
         expect(rating.userId).toBe(1);
       });
     });
@@ -99,7 +82,7 @@ describe('RatingsRepository Integration Tests', () => {
       
       expect(result.data).toHaveLength(2);
       expect(result.total).toBe(2);
-      result.data.forEach(rating => {
+      result.data.forEach((rating: any) => {
         expect(rating.movieId).toBe(1);
       });
     });
@@ -112,7 +95,7 @@ describe('RatingsRepository Integration Tests', () => {
       
       expect(result.data).toHaveLength(2);
       expect(result.total).toBe(2);
-      result.data.forEach(rating => {
+      result.data.forEach((rating: any) => {
         expect(rating.rating).toBe(5);
       });
     });
@@ -219,7 +202,7 @@ describe('RatingsRepository Integration Tests', () => {
       
       expect(result.data).toHaveLength(2);
       expect(result.total).toBe(2);
-      result.data.forEach(rating => {
+      result.data.forEach((rating: any) => {
         expect(rating.rating).toBe(5);
       });
     });
@@ -233,6 +216,64 @@ describe('RatingsRepository Integration Tests', () => {
       expect(result.data).toHaveLength(1);
       expect(result.total).toBe(1);
       expect(result.data[0].rating).toBe(2);
+    });
+
+    test('should handle LIKE queries', async () => {
+      const result = await ratingsRepository.findAll({ 
+        page: 1, 
+        limit: 10, 
+        like: { userId: '%1%' } 
+      });
+      
+      expect(result.data.length).toBeGreaterThan(0);
+      result.data.forEach((rating: any) => {
+        expect(rating.userId.toString()).toContain('1');
+      });
+    });
+
+    test('should handle complex WHERE and LIKE combinations', async () => {
+      const result = await ratingsRepository.findAll({ 
+        page: 1, 
+        limit: 10, 
+        where: { rating: 5 },
+        like: { userId: '%1%' }
+      });
+      
+      expect(result.data.length).toBeGreaterThan(0);
+      result.data.forEach((rating: any) => {
+        expect(rating.rating).toBe(5);
+        expect(rating.userId.toString()).toContain('1');
+      });
+    });
+
+    test('should handle custom select fields', async () => {
+      const result = await ratingsRepository.findAll({ 
+        page: 1, 
+        limit: 3, 
+        select: ['ratingId', 'rating', 'timestamp'] 
+      });
+      
+      expect(result.data.length).toBe(3);
+      result.data.forEach((rating: any) => {
+        expect(rating).toHaveProperty('ratingId');
+        expect(rating).toHaveProperty('rating');
+        expect(rating).toHaveProperty('timestamp');
+        expect(rating).not.toHaveProperty('userId');
+      });
+    });
+
+    test('should handle sorting by multiple fields', async () => {
+      const result = await ratingsRepository.findAll({ 
+        page: 1, 
+        limit: 3, 
+        order: { rating: 'desc' }
+      });
+      
+      expect(result.data.length).toBe(3);
+      // Verify ratings are in descending order
+      const ratings = result.data.map((r: any) => r.rating);
+      const sortedRatings = [...ratings].sort((a, b) => b - a);
+      expect(ratings).toEqual(sortedRatings);
     });
   });
 });

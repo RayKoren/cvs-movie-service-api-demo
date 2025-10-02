@@ -1,67 +1,327 @@
-# Movie API Code Test
+# Movie API
 
-## Pre-requisites
+A GraphQL API for movie data built with Node.js, TypeScript, and SQLite.
 
-* An IDE or text editor of your choice
-* [Sqlite3](http://www.sqlitetutorial.net/)
+## Features
 
+- **GraphQL API** with Apollo Server
+- **TypeScript** for type safety
+- **SQLite** databases for movies and ratings
+- **Pagination** support for all list endpoints
+- **Filtering and sorting** capabilities
+- **Comprehensive testing** with Jest
+- **Docker** support for containerization
+- **CI/CD** ready with GitHub Actions
 
-## Task
-Your task is to create an API on top of a couple different databases.  It should conform to the user stories provided below.  You are free to use whatever language you prefer, however our tech stack features NodeJS, Java and Ruby. If you're comfortable with any of these, try to favor them.  Google and the interwebs are at your disposal.
+## API Endpoints
 
-**The Databases**
-The databases are provided as a SQLite3 database in `db/`.  It does not require any credentials to login.  You can run SQL queries directly against the database using:
+### GraphQL Queries
+
+- `movies(page: Int)` - List all movies with pagination
+- `movie(id: Int, title: String)` - Get movie details by ID or title
+- `moviesByYear(year: Int!, page: Int, sort: String)` - Get movies by release year
+- `moviesByGenre(genre: String!, page: Int)` - Get movies by genre
+
+## Quick Start
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Run tests
+npm test
+
+# Run unit tests only
+npm run test:unit
+
+# Run integration tests
+npm run test:integration
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+### Docker
+
+```bash
+# Build and run with Docker Compose
+docker-compose --profile dev up --build
+
+# Run tests in Docker
+docker-compose --profile test up --build
+
+# Run production with Docker Compose
+docker-compose --profile prod up --build
+
+# Or use Makefile commands
+make docker-build
+make docker-test
+make docker-run
+```
+
+### Manual Docker Commands
+
+```bash
+# Build test image
+docker build --target test -t movie-api:test .
+
+# Build production image
+docker build --target runtime -t movie-api:latest .
+
+# Run production container
+docker run -it --rm -p 4000:4000 -v $(pwd)/db:/app/db:ro movie-api:latest
+```
+
+## Project Structure
 
 ```
-sqlite <path to db file>
+src/
+├── app.ts                 # Express app configuration
+├── server.ts              # Server startup
+├── controllers/           # Request handlers
+├── services/              # Business logic
+├── repositories/          # Data access layer
+├── graphql/               # GraphQL schema and resolvers
+├── helpers/               # Utility functions
+├── types/                 # TypeScript type definitions
+├── constants/             # Application constants
+└── tests/                 # Test files
+    ├── test_setup.ts      # Test database setup
+    ├── helpers/           # Test utilities
+    ├── repositories/      # Repository tests
+    ├── services/          # Service tests
+    ├── controllers/       # Controller tests
+    ├── resolvers/         # Resolver tests
+    └── api/               # API integration tests
 ```
 
-`.tables` will return a list of available tables and `.schema <table>` will provide the schema.
+## Database Schema
 
-## Considerations
-When developing your solution, please consider the following:
+### Movies Table
+- `movieId` (INTEGER PRIMARY KEY)
+- `imdbId` (TEXT)
+- `title` (TEXT)
+- `overview` (TEXT)
+- `productionCompanies` (TEXT)
+- `releaseDate` (TEXT)
+- `budget` (INTEGER)
+- `revenue` (INTEGER)
+- `runtime` (REAL)
+- `language` (TEXT)
+- `genres` (TEXT)
+- `status` (TEXT)
 
-* Structure of your endpoints - Can you easily extend the API to support new endpoints as feature requests come in?
-* Quality of your code - Does your code demonstrate the use of design patterns?
-* Testability - Is your code testable?
-* Can your solution be easily configured and deployed?  Consider guidelines from [12 Factor App](http://12factor.net/)
+### Ratings Table
+- `ratingId` (INTEGER PRIMARY KEY)
+- `userId` (INTEGER)
+- `movieId` (INTEGER)
+- `rating` (REAL)
+- `timestamp` (TEXT)
+
+## Testing
+
+The project includes comprehensive testing:
+
+- **Unit Tests**: Test individual functions and classes
+- **Integration Tests**: Test database interactions
+- **API Tests**: Test GraphQL endpoints end-to-end
+
+### Test Commands
+
+```bash
+# Run all tests
+npm test
+
+# Run unit tests only (no database required)
+npm run test:unit
+
+# Run integration tests (requires database)
+npm run test:integration
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+## CI/CD
+
+The project includes GitHub Actions workflow for:
+
+- **Testing**: Runs unit tests on every push/PR
+- **Security**: Vulnerability scanning with Trivy
+- **Deployment**: Automatic Docker image building and pushing
+
+### GitHub Actions Secrets
+
+To enable deployment, add these secrets to your repository:
+
+- `DOCKER_USERNAME`: Your Docker Hub username
+- `DOCKER_PASSWORD`: Your Docker Hub password
+
+## Environment Variables
+
+- `NODE_ENV`: Environment (development, test, production)
+- `PORT`: Server port (default: 4000)
+
+## Development
+
+### Adding New Features
+
+1. **Repository Layer**: Add data access methods
+2. **Service Layer**: Add business logic
+3. **Controller Layer**: Add request handling
+4. **GraphQL Layer**: Add schema and resolvers
+5. **Tests**: Add comprehensive test coverage
+
+### Code Quality
+
+- **TypeScript**: Strict type checking enabled
+- **ESLint**: Code linting and formatting
+- **Jest**: Testing framework with coverage reporting
+- **Docker**: Containerization for consistent environments
+
+## Deployment
+
+### Production Deployment
+
+1. **Build Docker Image**:
+   ```bash
+   docker build --target runtime -t movie-api:latest .
+   ```
+
+2. **Run Container**:
+   ```bash
+   docker run -d \
+     --name movie-api \
+     -p 4000:4000 \
+     -v /path/to/db:/app/db:ro \
+     movie-api:latest
+   ```
+
+3. **Environment Variables**:
+   ```bash
+   docker run -d \
+     --name movie-api \
+     -p 4000:4000 \
+     -e NODE_ENV=production \
+     -e PORT=4000 \
+     -v /path/to/db:/app/db:ro \
+     movie-api:latest
+   ```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  movie-api:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+    volumes:
+      - ./db:/app/db:ro
+```
+
+## API Usage Examples
+
+### GraphQL Queries
+
+```graphql
+# List movies with pagination
+query {
+  movies(page: 1) {
+    data {
+      movieId
+      imdbId
+      title
+      genres
+      releaseDate
+      budget
+    }
+    pagination {
+      page
+      limit
+      total
+      totalPages
+    }
+  }
+}
+
+# Get movie details
+query {
+  movie(id: 11) {
+    movieId
+    imdbId
+    title
+    overview
+    productionCompanies
+    releaseDate
+    budget
+    runtime
+    language
+    genres
+    averageRating
+    status
+  }
+}
+
+# Get movies by year
+query {
+  moviesByYear(year: 2003, page: 1, sort: "asc") {
+    data {
+      movieId
+      imdbId
+      title
+      genres
+      releaseDate
+      budget
+    }
+    pagination {
+      page
+      limit
+      total
+      totalPages
+    }
+  }
+}
+
+# Get movies by genre
+query {
+  moviesByGenre(genre: "Drama", page: 1) {
+    data {
+      movieId
+      imdbId
+      title
+      genres
+      releaseDate
+      budget
+    }
+    pagination {
+      page
+      limit
+      total
+      totalPages
+    }
+  }
+}
+```
 
 
-## User Stories
+## License
 
-#### List All Movies
-AC:
-
-* An endpoint exists that lists all movies
-* List is paginated: 50 movies per page, the page can be altered with the `page` query params
-* Columns should include: imdb id, title, genres, release date, budget
-* Budget is displayed in dollars
-
-#### Movie Details
-AC:
-
-* An endpoint exists that lists the movie details for a particular movie
-* Details should include: imdb id, title, description, release date, budget, runtime, average rating, genres, original language, production companies
-* Budget should be displayed in dollars
-* Ratings are pulled from the rating database
-
-#### Movies By Year
-AC:
-
-* An endpoint exists that will list all movies from a particular year 
-* List is paginated: 50 movies per page, the page can be altered with the `page` query params
-* List is sorted by date in chronological order
-* Sort order can be descending
-* Columns include: imdb id, title, genres, release date, budget
-
-#### Movies By Genre
-AC:
-
-* An endpoint exists that will list all movies by a genre
-* List is paginated: 50 movies per page, the page can be altered with the `page` query params
-* Columns include: imdb id, title, genres, release date, budget
-
-## Tips
-
-* This is a test of your abilities and not how fast you can crank through random stories.  As such, it is more important to produce well structured code that meets the criteria in the user stories rather than getting all stories done.
-* If you get stuck, please ask someone.  We want to know how you work both as an individual and as part of a team.  You will not lose points for asking for help on something that is unclear or where you are stuck.
+MIT License - see LICENSE file for details.

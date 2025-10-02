@@ -32,5 +32,3 @@ export function buildOrderClause(order?: Record<string, 'asc'|'desc'>): string {
   if (orderParts.length === 0) return '';
   return `ORDER BY ${orderParts.join(', ')}`;
 }
-
-

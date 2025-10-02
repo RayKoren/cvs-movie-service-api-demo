@@ -6,12 +6,12 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { typeDefs } from './graphql/schema/typeDefs';
 import { resolvers } from './graphql/resolvers';
+import type { GraphQLFormattedError } from 'graphql';
 
-async function startServer() {
+export async function createApp() {
     dotenv.config();
 
     const app = express();
-    const port = process.env.PORT || 4000;
 
     app.use(cors());
     app.use(helmet());
@@ -21,17 +21,46 @@ async function startServer() {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
+        formatError: (formattedError: GraphQLFormattedError, _error: unknown) => {
+            const isProd = process.env.NODE_ENV === 'production';
+            const message = formattedError.message || 'Unexpected error';
+            const path = formattedError.path;
+            const code = (formattedError.extensions && (formattedError.extensions as any).code) || 'INTERNAL_SERVER_ERROR';
+            if (!isProd) {
+                return { message, path, code, extensions: formattedError.extensions };
+            }
+            return { message, path, code };
+        }
     });
     await server.start();
-
     app.use('/graphql', expressMiddleware(server));
 
-    app.listen(port, () => {
-        console.info(`Server is running on port http://localhost:${port}/graphql`);
+    // 404 handler
+    app.use((req, res, next) => {
+        res.status(404).json({ error: 'Not Found' });
     });
+
+    // Centralized error handler
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        const status = err.status || 500;
+        const isProd = process.env.NODE_ENV === 'production';
+        const payload: any = { error: err.message || 'Internal Server Error' };
+        if (!isProd) {
+            payload.stack = err.stack;
+        }
+        res.status(status).json(payload);
+    });
+
+    return app;
 }
 
-startServer().catch(error => {
-    console.error('Error starting server:', error);
+// Process-level safety nets
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
     process.exit(1);
 });

@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Development service
+  app-dev:
+    build:
+      context: .
+      target: build
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+    volumes:
+      - ./src:/app/src
+      - ./db:/app/db
+    command: npm run dev
+    profiles:
+      - dev
+
+  # Test service
+  app-test:
+    build:
+      context: .
+      target: test
+    environment:
+      - NODE_ENV=test
+    profiles:
+      - test
+
+  # Production service
+  app-prod:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+    volumes:
+      - ./db:/app/db:ro
+    profiles:
+      - prod
+
+  # Database service (if needed for future expansion)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=movieapi
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    profiles:
+      - db
+
+volumes:
+  postgres_data:

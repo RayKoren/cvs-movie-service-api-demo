@@ -1,31 +1,13 @@
-import { MovieRepository } from '../../repositories/movie_repository';
-import { setupTestDatabases, cleanupTestDatabases, getTestDbPath } from '../setup';
+import { setupTestDatabases, cleanupTestDatabases } from '../test_setup';
+import { createTestMovieRepository } from '../helpers/testDbHelper';
 import { Movie } from '../../types';
-import path from 'path';
-
-// Mock the database path to use test databases
-jest.mock('../../repositories/movie_repository', () => {
-  const originalModule = jest.requireActual('../../repositories/movie_repository');
-  return {
-    ...originalModule,
-    MovieRepository: class extends originalModule.MovieRepository {
-      constructor() {
-        super();
-        // Override database paths to use test databases
-        const testDbPath = getTestDbPath();
-        this.moviesDb = new (require('sqlite3').Database)(path.join(testDbPath, 'movies.db'));
-        this.ratingsDb = new (require('sqlite3').Database)(path.join(testDbPath, 'ratings.db'));
-      }
-    }
-  };
-});
 
 describe('MovieRepository Integration Tests', () => {
-  let movieRepository: MovieRepository;
+  let movieRepository: any;
 
   beforeAll(async () => {
     await setupTestDatabases();
-    movieRepository = new MovieRepository();
+    movieRepository = createTestMovieRepository();
   });
 
   afterAll(async () => {
@@ -112,7 +94,7 @@ describe('MovieRepository Integration Tests', () => {
       
       expect(result.data).toHaveLength(2);
       expect(result.total).toBe(2);
-      result.data.forEach(movie => {
+      result.data.forEach((movie: any) => {
         expect(movie.language).toBe('English');
         expect(movie.status).toBe('Released');
       });
@@ -180,6 +162,64 @@ describe('MovieRepository Integration Tests', () => {
       expect(result.data).toHaveLength(0);
       expect(result.total).toBe(3);
       expect(result.page).toBe(10);
+    });
+
+    test('should handle LIKE queries with special characters', async () => {
+      const result = await movieRepository.findAll({ 
+        page: 1, 
+        limit: 10, 
+        like: { title: '%Test%' } 
+      });
+      
+      expect(result.data.length).toBeGreaterThan(0);
+      result.data.forEach((movie: any) => {
+        expect(movie.title).toContain('Test');
+      });
+    });
+
+    test('should handle complex WHERE and LIKE combinations', async () => {
+      const result = await movieRepository.findAll({ 
+        page: 1, 
+        limit: 10, 
+        where: { language: 'English' },
+        like: { title: '%Test%' }
+      });
+      
+      expect(result.data.length).toBeGreaterThan(0);
+      result.data.forEach((movie: any) => {
+        expect(movie.language).toBe('English');
+        expect(movie.title).toContain('Test');
+      });
+    });
+
+    test('should handle custom select fields', async () => {
+      const result = await movieRepository.findAll({ 
+        page: 1, 
+        limit: 3, 
+        select: ['movieId', 'title', 'budget'] 
+      });
+      
+      expect(result.data.length).toBe(3);
+      result.data.forEach((movie: any) => {
+        expect(movie).toHaveProperty('movieId');
+        expect(movie).toHaveProperty('title');
+        expect(movie).toHaveProperty('budget');
+        expect(movie).not.toHaveProperty('overview');
+      });
+    });
+
+    test('should handle sorting by multiple fields', async () => {
+      const result = await movieRepository.findAll({ 
+        page: 1, 
+        limit: 3, 
+        order: { title: 'asc' }
+      });
+      
+      expect(result.data.length).toBe(3);
+      // Verify titles are in ascending order
+      const titles = result.data.map((m: any) => m.title);
+      const sortedTitles = [...titles].sort();
+      expect(titles).toEqual(sortedTitles);
     });
   });
 });

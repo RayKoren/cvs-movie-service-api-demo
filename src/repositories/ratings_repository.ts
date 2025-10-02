@@ -3,7 +3,6 @@ import path from 'path';
 import { Rating, Paginated, FindAllOptions } from '../types';
 import { buildWhereClause, buildOrderClause } from '../helpers/sql_helpers';
 
-
 export class RatingsRepository {
   private ratingsDb: sqlite3.Database;
 
@@ -46,17 +45,13 @@ export class RatingsRepository {
   async findAll(opts: FindAllOptions<Rating>): Promise<Paginated<Rating>> {
     const { page, limit = 10, where, order, select, like } = opts;
     const offset = (page - 1) * limit;
-    
-    // Build WHERE clause
+ 
     const { clause: whereClause, params } = buildWhereClause<Rating>(where, like);
     
-    // Build ORDER BY clause
     const orderClause = buildOrderClause(order);
     
-    // Get total count
     const total = await this.countTotal(whereClause, params);
     
-    // Get paginated data
     const columns = Array.isArray(select) && select.length > 0 ? select.join(', ') : '*';
     const dataQuery = `SELECT ${columns} FROM ratings ${whereClause} ${orderClause} LIMIT ? OFFSET ?`;
     const data = await new Promise<Rating[]>((resolve, reject) => {
