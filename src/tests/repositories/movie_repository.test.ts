@@ -216,7 +216,6 @@ describe('MovieRepository Integration Tests', () => {
       });
       
       expect(result.data.length).toBe(3);
-      // Verify titles are in ascending order
       const titles = result.data.map((m: any) => m.title);
       const sortedTitles = [...titles].sort();
       expect(titles).toEqual(sortedTitles);

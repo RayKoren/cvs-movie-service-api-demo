@@ -10,7 +10,6 @@ describe('Movie Resolvers Error Handling', () => {
   });
 
   test('should handle errors in movies resolver', async () => {
-    // Mock a scenario that would cause an error
     const query = `
       query {
         movies(page: -999) {
@@ -27,7 +26,6 @@ describe('Movie Resolvers Error Handling', () => {
       .send({ query });
 
     expect(res.status).toBe(200);
-    // Should either return data or handle error gracefully
     expect(res.body).toBeDefined();
   });
 

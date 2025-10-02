@@ -7,7 +7,6 @@ beforeAll(() => {
 });
 
 afterEach(() => {
-  // Ensure no pending nock mocks remain
   if (!nock.isDone()) {
     const pending = nock.pendingMocks();
     // eslint-disable-next-line no-console

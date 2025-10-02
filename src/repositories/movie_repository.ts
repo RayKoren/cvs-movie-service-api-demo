@@ -36,16 +36,12 @@ export class MovieRepository {
     const { page, limit = 10, where, order, select, like } = opts;
     const offset = (page - 1) * limit;
     
-    // Build WHERE clause
     const { clause: whereClause, params } = buildWhereClause<Movie>(where, like);
     
-    // Build ORDER BY clause
     const orderClause = buildOrderClause(order);
     
-    // Get total count
     const total = await this.countTotal(whereClause, params);
-    
-    // Get paginated data
+   
     const columns = Array.isArray(select) && select.length > 0 ? select.join(', ') : '*';
     const dataQuery = `SELECT ${columns} FROM movies ${whereClause} ${orderClause} LIMIT ? OFFSET ?`;
     const data = await new Promise<Movie[]>((resolve, reject) => {

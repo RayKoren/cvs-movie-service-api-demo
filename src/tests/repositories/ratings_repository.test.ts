@@ -270,7 +270,6 @@ describe('RatingsRepository Integration Tests', () => {
       });
       
       expect(result.data.length).toBe(3);
-      // Verify ratings are in descending order
       const ratings = result.data.map((r: any) => r.rating);
       const sortedRatings = [...ratings].sort((a, b) => b - a);
       expect(ratings).toEqual(sortedRatings);

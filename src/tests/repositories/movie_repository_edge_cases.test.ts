@@ -84,7 +84,6 @@ describe('MovieRepository Edge Cases', () => {
       limit: 10 
     });
     
-    // Negative page results in negative offset, which SQLite handles gracefully
     expect(result.data.length).toBeGreaterThan(0);
     expect(result.page).toBe(-1);
   });
@@ -107,7 +106,7 @@ describe('MovieRepository Edge Cases', () => {
     });
     
     expect(result.data.length).toBe(3);
-    // Should return all fields when select is empty
+    // return all fields when select is empty
     result.data.forEach((movie: any) => {
       expect(movie).toHaveProperty('movieId');
       expect(movie).toHaveProperty('title');

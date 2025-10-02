@@ -56,7 +56,6 @@ describe('GraphQL API', () => {
     expect(res.body.data.movie.title).toBeDefined();
   });
 
-  // Negative test cases
   test('invalid GraphQL query returns error', async () => {
     const query = `
       query InvalidQuery {
@@ -115,7 +114,6 @@ describe('GraphQL API', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.errors).toBeUndefined();
-    // API passes through negative page numbers as-is
     expect(res.body.data.movies.pagination.page).toBe(-1);
   });
 

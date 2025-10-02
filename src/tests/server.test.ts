@@ -1,6 +1,5 @@
 import { createApp } from '../app';
 
-// Mock the server startup to avoid actually starting the server
 jest.mock('../server', () => ({
   startServer: jest.fn()
 }));
@@ -37,21 +36,11 @@ describe('Server', () => {
   });
 });
 
-// Test the actual server.ts file
 describe('Server Module', () => {
   test('should import server module without errors', () => {
-    // This test ensures the server.ts file can be imported
-    // The actual server startup is mocked to avoid starting a real server
     expect(() => {
       require('../server');
     }).not.toThrow();
   });
 
-  test('should handle server startup errors', async () => {
-    // This test verifies that the server module can be imported
-    // The actual error handling is tested through the app creation
-    expect(() => {
-      require('../server');
-    }).not.toThrow();
-  });
 });

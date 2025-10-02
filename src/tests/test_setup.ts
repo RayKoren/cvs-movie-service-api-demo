@@ -6,7 +6,7 @@ const BASE_TEST_DB_DIR = path.join(__dirname, '../../test-db');
 const WORKER_ID = String(process.env.JEST_WORKER_ID || '1');
 const TEST_DB_DIR = path.join(BASE_TEST_DB_DIR, WORKER_ID);
 
-// Ensure test database directory exists
+
 if (!fs.existsSync(TEST_DB_DIR)) {
   fs.mkdirSync(TEST_DB_DIR, { recursive: true });
 }
@@ -15,7 +15,6 @@ export const setupTestDatabases = async () => {
   const moviesDbPath = path.join(TEST_DB_DIR, 'movies.db');
   const ratingsDbPath = path.join(TEST_DB_DIR, 'ratings.db');
 
-  // Ensure fresh writable files each run
   if (fs.existsSync(moviesDbPath)) {
     try {
       fs.unlinkSync(moviesDbPath);
@@ -31,7 +30,7 @@ export const setupTestDatabases = async () => {
     }
   }
 
-  // Create movies test database
+
   const moviesDb = new sqlite3.Database(moviesDbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
   await new Promise<void>((resolve, reject) => {
     moviesDb.serialize(() => {
@@ -57,7 +56,7 @@ export const setupTestDatabases = async () => {
     });
   });
 
-  // Insert test movies
+
   const testMovies = [
     {
       movieId: 1,
@@ -121,7 +120,6 @@ export const setupTestDatabases = async () => {
 
   moviesDb.close();
 
-  // Create ratings test database
   const ratingsDb = new sqlite3.Database(ratingsDbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
   await new Promise<void>((resolve, reject) => {
     ratingsDb.serialize(() => {
@@ -170,7 +168,7 @@ export const cleanupTestDatabases = async () => {
       fs.rmSync(TEST_DB_DIR, { recursive: true, force: true });
     }
   } catch (err) {
-    // intentionally ignore cleanup errors
+    // ignore
   }
 };
 

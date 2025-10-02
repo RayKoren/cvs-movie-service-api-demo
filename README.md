@@ -65,7 +65,7 @@ docker compose --profile test up --build app-test
 # Run PROD with Docker Compose
 docker compose --profile prod up --build app-prod
 
-# Or use Makefile commands
+#  Makefile commands
 make docker-build
 make docker-test
 make docker-run

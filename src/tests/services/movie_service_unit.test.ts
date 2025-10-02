@@ -16,17 +16,14 @@ describe('MovieService Unit Tests', () => {
   let mockRatingsRepository: jest.Mocked<RatingsRepository>;
 
   beforeEach(() => {
-    // Clear all mocks
     jest.clearAllMocks();
     
-    // Create mock instances
     mockMovieRepository = new MockMovieRepository() as jest.Mocked<MovieRepository>;
     mockRatingsRepository = new MockRatingsRepository() as jest.Mocked<RatingsRepository>;
-    
-    // Create service instance
+
     movieService = new MovieService();
     
-    // Inject mocks
+
     (movieService as any).movieRepository = mockMovieRepository;
     (movieService as any).ratingsRepository = mockRatingsRepository;
   });

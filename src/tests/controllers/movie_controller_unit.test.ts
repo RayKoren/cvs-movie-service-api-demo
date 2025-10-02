@@ -11,16 +11,10 @@ describe('MovieController Unit Tests', () => {
   let mockMovieService: jest.Mocked<MovieService>;
 
   beforeEach(() => {
-    // Clear all mocks
     jest.clearAllMocks();
-    
-    // Create mock service instance
     mockMovieService = new MockMovieService() as jest.Mocked<MovieService>;
-    
-    // Create controller instance
     controller = new MovieController();
-    
-    // Inject mock service
+
     (controller as any).movieService = mockMovieService;
   });
 

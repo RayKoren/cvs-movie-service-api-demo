@@ -8,7 +8,6 @@ describe('MovieService', () => {
   beforeAll(async () => {
     await setupTestDatabases();
     service = new MovieService();
-    // Inject test repositories
     (service as any).movieRepository = createTestMovieRepository();
     (service as any).ratingsRepository = createTestRatingsRepository();
   });
@@ -33,7 +32,7 @@ describe('MovieService', () => {
       expect(details).toBeDefined();
       expect(details?.movieId).toBe(1);
       expect(details).toHaveProperty('avgRating');
-      // Our seeded ratings include ratings for movieId=1 (5 and 4), average should be ~4.5
+      // ratings for movieId=1 (5 and 4), average should be 4.5
       expect((details as any).avgRating).toBeCloseTo(4.5, 1);
     });
 
