@@ -163,10 +163,8 @@ The project includes GitHub Actions workflow for:
 
 ### GitHub Actions Secrets
 
-To enable deployment, add these secrets to your repository:
-
-- `DOCKER_USERNAME`: Your Docker Hub username
-- `DOCKER_PASSWORD`: Your Docker Hub password
+- `DOCKER_USERNAME`: Docker Hub username
+- `DOCKER_PASSWORD`: Docker Hub password
 
 ## Environment Variables
 
