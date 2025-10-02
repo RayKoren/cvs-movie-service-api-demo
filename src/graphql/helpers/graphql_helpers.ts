@@ -1,7 +1,17 @@
-export function formatDollars(value: any): string | null {
-  const num = typeof value === 'number' ? value : (value ? Number(value) : null);
-  if (num === null || Number.isNaN(num)) return null;
-  return `$${num.toLocaleString('en-US')}`;
+const usdFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+export function formatDollars(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'boolean') return null;
+  if (typeof value === 'string' && value.trim() === '') return null;
+  const num = typeof value === 'number' ? value : Number(value as any);
+  if (!Number.isFinite(num)) return null;
+  return usdFormatter.format(num);
 }
 
 export function formatText(genres: any): string | null {

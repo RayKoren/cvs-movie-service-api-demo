@@ -33,10 +33,14 @@ npm install
 # Start development server
 npm run dev
 
-# Run tests
+# Linter
+npm run lint
+npm run lint:fix
+
+# Run all tests
 npm test
 
-# Run unit tests only
+# Run unit tests
 npm run test:unit
 
 # Run integration tests
@@ -52,14 +56,14 @@ npm start
 ### Docker
 
 ```bash
-# Build and run with Docker Compose
-docker-compose --profile dev up --build
+# Build and run DEV with Docker Compose (Compose v2)
+docker compose --profile dev up --build app-dev
 
-# Run tests in Docker
-docker-compose --profile test up --build
+# Run TEST profile (executes tests, then exits)
+docker compose --profile test up --build app-test
 
-# Run production with Docker Compose
-docker-compose --profile prod up --build
+# Run PROD with Docker Compose
+docker compose --profile prod up --build app-prod
 
 # Or use Makefile commands
 make docker-build
@@ -158,7 +162,6 @@ npm run test:watch
 The project includes GitHub Actions workflow for:
 
 - **Testing**: Runs unit tests on every push/PR
-- **Security**: Vulnerability scanning with Trivy
 - **Deployment**: Automatic Docker image building and pushing
 
 ### GitHub Actions Secrets
@@ -300,7 +303,7 @@ query {
 
 # Get movies by genre
 query {
-  moviesByGenre(genre: "Drama", page: 1) {
+  moviesByGenre(genre: "Action", page: 1) {
     data {
       movieId
       imdbId

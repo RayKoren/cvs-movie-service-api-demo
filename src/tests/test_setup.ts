@@ -2,7 +2,9 @@ import sqlite3 from 'sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-const TEST_DB_DIR = path.join(__dirname, '../../test-db');
+const BASE_TEST_DB_DIR = path.join(__dirname, '../../test-db');
+const WORKER_ID = String(process.env.JEST_WORKER_ID || '1');
+const TEST_DB_DIR = path.join(BASE_TEST_DB_DIR, WORKER_ID);
 
 // Ensure test database directory exists
 if (!fs.existsSync(TEST_DB_DIR)) {
@@ -13,8 +15,24 @@ export const setupTestDatabases = async () => {
   const moviesDbPath = path.join(TEST_DB_DIR, 'movies.db');
   const ratingsDbPath = path.join(TEST_DB_DIR, 'ratings.db');
 
+  // Ensure fresh writable files each run
+  if (fs.existsSync(moviesDbPath)) {
+    try {
+      fs.unlinkSync(moviesDbPath);
+    } catch (err) {
+      // ignore 
+    }
+  }
+  if (fs.existsSync(ratingsDbPath)) {
+    try {
+      fs.unlinkSync(ratingsDbPath);
+    } catch (err) {
+      // ignore
+    }
+  }
+
   // Create movies test database
-  const moviesDb = new sqlite3.Database(moviesDbPath);
+  const moviesDb = new sqlite3.Database(moviesDbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
   await new Promise<void>((resolve, reject) => {
     moviesDb.serialize(() => {
       moviesDb.run(`
@@ -104,7 +122,7 @@ export const setupTestDatabases = async () => {
   moviesDb.close();
 
   // Create ratings test database
-  const ratingsDb = new sqlite3.Database(ratingsDbPath);
+  const ratingsDb = new sqlite3.Database(ratingsDbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
   await new Promise<void>((resolve, reject) => {
     ratingsDb.serialize(() => {
       ratingsDb.run(`
@@ -147,14 +165,12 @@ export const setupTestDatabases = async () => {
 };
 
 export const cleanupTestDatabases = async () => {
-  const moviesDbPath = path.join(TEST_DB_DIR, 'movies.db');
-  const ratingsDbPath = path.join(TEST_DB_DIR, 'ratings.db');
-
-  if (fs.existsSync(moviesDbPath)) {
-    fs.unlinkSync(moviesDbPath);
-  }
-  if (fs.existsSync(ratingsDbPath)) {
-    fs.unlinkSync(ratingsDbPath);
+  try {
+    if (fs.existsSync(TEST_DB_DIR)) {
+      fs.rmSync(TEST_DB_DIR, { recursive: true, force: true });
+    }
+  } catch (err) {
+    // intentionally ignore cleanup errors
   }
 };
 

@@ -3,40 +3,40 @@ import { formatDollars, formatText } from '../../graphql/helpers/graphql_helpers
 describe('GraphQL Helpers Unit Tests', () => {
   describe('formatDollars', () => {
     it('should format positive integers', () => {
-      expect(formatDollars(1000)).toBe('$1,000');
-      expect(formatDollars(1000000)).toBe('$1,000,000');
-      expect(formatDollars(1234567)).toBe('$1,234,567');
+      expect(formatDollars(1000)).toBe('$1,000.00');
+      expect(formatDollars(1000000)).toBe('$1,000,000.00');
+      expect(formatDollars(1234567)).toBe('$1,234,567.00');
     });
 
     it('should format negative integers', () => {
-      expect(formatDollars(-1000)).toBe('$-1,000');
-      expect(formatDollars(-1000000)).toBe('$-1,000,000');
+      expect(formatDollars(-1000)).toBe('-$1,000.00');
+      expect(formatDollars(-1000000)).toBe('-$1,000,000.00');
     });
 
     it('should format zero', () => {
-      expect(formatDollars(0)).toBe('$0');
+      expect(formatDollars(0)).toBe('$0.00');
     });
 
     it('should format positive decimals', () => {
-      expect(formatDollars(1000.50)).toBe('$1,000.5');
+      expect(formatDollars(1000.50)).toBe('$1,000.50');
       expect(formatDollars(1234.56)).toBe('$1,234.56');
       expect(formatDollars(0.99)).toBe('$0.99');
     });
 
     it('should format negative decimals', () => {
-      expect(formatDollars(-1000.50)).toBe('$-1,000.5');
-      expect(formatDollars(-1234.56)).toBe('$-1,234.56');
+      expect(formatDollars(-1000.50)).toBe('-$1,000.50');
+      expect(formatDollars(-1234.56)).toBe('-$1,234.56');
     });
 
     it('should format string numbers', () => {
-      expect(formatDollars('1000')).toBe('$1,000');
-      expect(formatDollars('1000000')).toBe('$1,000,000');
+      expect(formatDollars('1000')).toBe('$1,000.00');
+      expect(formatDollars('1000000')).toBe('$1,000,000.00');
       expect(formatDollars('1234.56')).toBe('$1,234.56');
     });
 
     it('should format negative string numbers', () => {
-      expect(formatDollars('-1000')).toBe('$-1,000');
-      expect(formatDollars('-1234.56')).toBe('$-1,234.56');
+      expect(formatDollars('-1000')).toBe('-$1,000.00');
+      expect(formatDollars('-1234.56')).toBe('-$1,234.56');
     });
 
     it('should handle null input', () => {
@@ -62,32 +62,32 @@ describe('GraphQL Helpers Unit Tests', () => {
     });
 
     it('should handle Infinity', () => {
-      expect(formatDollars(Infinity)).toBe('$∞');
-      expect(formatDollars(-Infinity)).toBe('$-∞');
+      expect(formatDollars(Infinity)).toBe(null);
+      expect(formatDollars(-Infinity)).toBe(null);
     });
 
     it('should handle very large numbers', () => {
-      expect(formatDollars(999999999999)).toBe('$999,999,999,999');
-      expect(formatDollars(1000000000000)).toBe('$1,000,000,000,000');
+      expect(formatDollars(999999999999)).toBe('$999,999,999,999.00');
+      expect(formatDollars(1000000000000)).toBe('$1,000,000,000,000.00');
     });
 
     it('should handle very small numbers', () => {
       expect(formatDollars(0.01)).toBe('$0.01');
-      expect(formatDollars(0.001)).toBe('$0.001');
+      expect(formatDollars(0.001)).toBe('$0.00');
     });
 
     it('should handle numbers with many decimal places', () => {
-      expect(formatDollars(1234.56789)).toBe('$1,234.568');
-      expect(formatDollars(1234.123456789)).toBe('$1,234.123');
+      expect(formatDollars(1234.56789)).toBe('$1,234.57');
+      expect(formatDollars(1234.123456789)).toBe('$1,234.12');
     });
 
     it('should handle scientific notation', () => {
-      expect(formatDollars(1e6)).toBe('$1,000,000');
-      expect(formatDollars(1.5e6)).toBe('$1,500,000');
+      expect(formatDollars(1e6)).toBe('$1,000,000.00');
+      expect(formatDollars(1.5e6)).toBe('$1,500,000.00');
     });
 
     it('should handle boolean values', () => {
-      expect(formatDollars(true)).toBe('$1');
+      expect(formatDollars(true)).toBe(null);
       expect(formatDollars(false)).toBe(null);
     });
 

@@ -21,6 +21,7 @@ export async function createApp() {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
+        introspection: true,
         formatError: (formattedError: GraphQLFormattedError, _error: unknown) => {
             const isProd = process.env.NODE_ENV === 'production';
             const message = formattedError.message || 'Unexpected error';
@@ -35,12 +36,17 @@ export async function createApp() {
     await server.start();
     app.use('/graphql', expressMiddleware(server));
 
+    // healthcheck
+    app.get('/health', (req, res) => {
+        res.status(200).json({ status: 'flux capacitor fluxing...', uptime: process.uptime() });
+    });
+
     // 404 handler
     app.use((req, res, next) => {
         res.status(404).json({ error: 'Not Found' });
     });
 
-    // Centralized error handler
+    // error handler
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
         const status = err.status || 500;
@@ -55,7 +61,7 @@ export async function createApp() {
     return app;
 }
 
-// Process-level safety nets
+// process safety nets
 process.on('unhandledRejection', (reason) => {
     console.error('Unhandled Promise Rejection:', reason);
 });
